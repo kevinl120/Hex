@@ -82,6 +82,13 @@
 		</dict>
 		<key>Sprites</key>
 		<dict/>
+		<key>Temporary Resources/BlueHexagon.png</key>
+		<dict/>
+		<key>Temporary Resources/BlueHexagonResized.png</key>
+		<dict>
+			<key>scaleFrom</key>
+			<integer>4</integer>
+		</dict>
 		<key>Temporary Resources/HexGrid2.png</key>
 		<dict>
 			<key>scaleFrom</key>

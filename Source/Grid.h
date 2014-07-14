@@ -10,7 +10,4 @@
 
 @interface Grid : CCSprite
 
-- (void) onEnter;
-- (void) setupGrid;
-
 @end
