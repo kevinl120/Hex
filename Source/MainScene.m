@@ -10,4 +10,11 @@
 
 @implementation MainScene
 
+- (void) play {
+    CCScene *gameplayScene = [CCBReader loadAsScene: @"Gameplay"];
+    CCTransition *transition = [CCTransition transitionFadeWithColor:[CCColor blackColor] duration:1.0f];
+    [[CCDirector sharedDirector] presentScene:gameplayScene withTransition:transition];
+}
+
+
 @end

@@ -64,21 +64,23 @@ static const int GRID_SIDE = 5;
         // Loops a number of times equal to the number of columns in the grid
         // The current column number is the variable "i"
         
+        // Temporary array used to create the 2-d array "_gridArray"
         NSMutableArray *temporaryArray = [[NSMutableArray alloc]init];
         
         for (int j = 0; j < columnCount; j++) {
+            // Load the hexagon onto the screen
             Hexagon *hexagon = (Hexagon*)[CCBReader load:@"Hexagon"];
-
             hexagon.positionInPoints = ccp(x, y);
-            
             [self addChild:hexagon];
             
-            
+            // Add the hexagon to the temporary array
             [temporaryArray addObject: hexagon];
             
+            // Positioning for the next hexagon
             y -= _hexagonHeight;
         }
         
+        // Add the temporary array to _gridArray to form the 2-d array
         [_gridArray addObject:temporaryArray];
         
         
@@ -103,5 +105,64 @@ static const int GRID_SIDE = 5;
     }
 }
 
+
+- (void) touchBegan:(UITouch *)touch withEvent:(UIEvent *)event {
+    // Get the x and y coordinates of the touch
+    CGPoint touchLocation = [touch locationInNode:self];
+    
+    // Get the Hexagon at that location
+    Hexagon *hexagon = [self hexagonForTouchPosition:touchLocation];
+    
+    // Remove the Hexagon that was touched
+    if (hexagon != nil) {
+        [hexagon removeFromParent];
+    }
+}
+
+
+- (Hexagon *) hexagonForTouchPosition:(CGPoint)touchPosition {
+    
+    // Get the column that was touched
+    int column = touchPosition.x / (1.5*_hexagonRadius);
+    
+    // Get the row that was touched (Takes multiple steps!). Position is a temporary variable to help find row
+    float position = self.contentSize.height;
+    int row = 0;
+    // columnCount is a value equal to the number of hexagons in the current column (Used in finding row)
+    NSInteger columnCount = GRID_SIDE;
+    
+    // Find the number of hexagons in the column that was touched
+    for (int i = 0; i < column; i++) {
+        // Increase the number of hexagons in the next column by 1 if we are not yet halfway through the columns, decrease the number of hexagons in the next column by 1 if we are more than halfway through the columns
+        if (i >= ((GRID_COLUMNS-1)/2)) {
+            columnCount--;
+        } else {
+            columnCount++;
+        }
+    }
+    
+    // Set position to the y value (position) of the first hexagon in the touched column
+    for (int i = GRID_COLUMNS; i > columnCount; i--) {
+        position -= (_hexagonHeight/2);
+    }
+    position -= (_hexagonHeight/2);
+    
+    // Return nil if the user touched above the first hexagon in the touched column
+    if (touchPosition.y > (position + _hexagonHeight/2)) {
+        return nil;
+    }
+    
+    // Move position until it is in the same hexagon as row
+    while (position > (touchPosition.y + (_hexagonHeight/2))){
+        position -= (_hexagonHeight);
+        row++;
+    }
+    // Return nil if the user touched below the last hexagon in the touched column
+    if (row < columnCount && column < GRID_COLUMNS) {
+            return _gridArray[column][row];
+    } else {
+        return nil;
+    }
+}
 
 @end
