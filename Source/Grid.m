@@ -22,7 +22,13 @@ static const int GRID_SIDE = 5;
     // The height (2*apothem) and the radius of the hexagon
     float _hexagonHeight;
     float _hexagonRadius;
+    
 }
+
+// -----------------------------------------------------------------------
+#pragma mark Setup Grid
+// -----------------------------------------------------------------------
+
 
 - (void) onEnter {
     [super onEnter];
@@ -31,6 +37,9 @@ static const int GRID_SIDE = 5;
     
     // Accept touches on the grid
     self.userInteractionEnabled = true;
+    
+    // Make it look cooler (optional) ;)
+    self.opacity = 0.00f;
 }
 
 
@@ -72,6 +81,25 @@ static const int GRID_SIDE = 5;
             Hexagon *hexagon = (Hexagon*)[CCBReader load:@"Hexagon"];
             hexagon.positionInPoints = ccp(x, y);
             [self addChild:hexagon];
+            // Give the hexagon a random color
+            int randomInt = arc4random() % 8;
+            if (randomInt == 1) {
+                hexagon.color = [CCColor yellowColor];
+            } else if (randomInt == 2) {
+                hexagon.color = [CCColor blueColor];
+            } else if (randomInt == 3) {
+                hexagon.color = [CCColor purpleColor];
+            } else if (randomInt == 4) {
+                hexagon.color = [CCColor redColor];
+            } else if (randomInt == 5) {
+                hexagon.color = [CCColor brownColor];
+            } else if (randomInt == 6) {
+                hexagon.color = [CCColor orangeColor];
+            } else if (randomInt == 7) {
+                hexagon.color = [CCColor grayColor];
+            } else if (randomInt == 0) {
+                hexagon.color = [CCColor greenColor];
+            }
             
             // Add the hexagon to the temporary array
             [temporaryArray addObject: hexagon];
@@ -105,6 +133,10 @@ static const int GRID_SIDE = 5;
     }
 }
 
+// -----------------------------------------------------------------------
+#pragma mark React to touches
+// -----------------------------------------------------------------------
+
 
 - (void) touchBegan:(UITouch *)touch withEvent:(UIEvent *)event {
     // Get the x and y coordinates of the touch
@@ -112,11 +144,15 @@ static const int GRID_SIDE = 5;
     
     // Get the Hexagon at that location
     Hexagon *hexagon = [self hexagonForTouchPosition:touchLocation];
-    
+
     // Remove the Hexagon that was touched
     if (hexagon != nil) {
         [hexagon removeFromParent];
     }
+}
+
+- (void) touchMoved:(UITouch *)touch withEvent:(UIEvent *)event {
+    [self touchBegan:(UITouch *)touch withEvent:(UIEvent *)event];
 }
 
 
@@ -159,10 +195,12 @@ static const int GRID_SIDE = 5;
     }
     // Return nil if the user touched below the last hexagon in the touched column
     if (row < columnCount && column < GRID_COLUMNS) {
-            return _gridArray[column][row];
+        return _gridArray[column][row];
     } else {
         return nil;
     }
 }
+
+
 
 @end

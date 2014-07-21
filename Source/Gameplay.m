@@ -11,11 +11,7 @@
 #import "Grid.h"
 
 
-@implementation Gameplay {
-
-}
-
-
+@implementation Gameplay
 
 
 @end

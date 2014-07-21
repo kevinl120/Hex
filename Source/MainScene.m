@@ -16,5 +16,4 @@
     [[CCDirector sharedDirector] presentScene:gameplayScene withTransition:transition];
 }
 
-
 @end
