@@ -23,6 +23,10 @@ static const int GRID_SIDE = 5;
     float _hexagonHeight;
     float _hexagonRadius;
     
+    Hexagon *_currentHexagon;
+    Hexagon *_lastHexagon;
+    
+    NSMutableArray *_selectedHexagons;
 }
 
 // -----------------------------------------------------------------------
@@ -38,8 +42,11 @@ static const int GRID_SIDE = 5;
     // Accept touches on the grid
     self.userInteractionEnabled = true;
     
-    // Make it look cooler (optional) ;)
+    // Make it look cooler (optional) :P
     self.opacity = 0.00f;
+    
+    // Initialize the _selectedHexagons array as an empty NSMutableArray
+    _selectedHexagons = [[NSMutableArray alloc]init];
 }
 
 
@@ -101,8 +108,9 @@ static const int GRID_SIDE = 5;
                 hexagon.color = [CCColor greenColor];
             }
             
+            
             // Add the hexagon to the temporary array
-            [temporaryArray addObject: hexagon];
+            [temporaryArray addObject:hexagon];
             
             // Positioning for the next hexagon
             y -= _hexagonHeight;
@@ -144,15 +152,37 @@ static const int GRID_SIDE = 5;
     
     // Get the Hexagon at that location
     Hexagon *hexagon = [self hexagonForTouchPosition:touchLocation];
+    _currentHexagon = hexagon;
 
-    // Remove the Hexagon that was touched
     if (hexagon != nil) {
-        [hexagon removeFromParent];
+        [_selectedHexagons addObject:hexagon];
+        
+        // Animations when hexagons are touched
+        hexagon.scale = 1.2f;
     }
 }
 
 - (void) touchMoved:(UITouch *)touch withEvent:(UIEvent *)event {
-    [self touchBegan:(UITouch *)touch withEvent:(UIEvent *)event];
+    // [self touchBegan:(UITouch *)touch withEvent:(UIEvent *)event];
+    
+    // Get the x and y coordinates of the touch
+    CGPoint touchLocation = [touch locationInNode:self];
+    
+    // Get the Hexagon at that location
+    Hexagon *hexagon = [self hexagonForTouchPosition:touchLocation];
+    
+    if (_currentHexagon != hexagon && hexagon != nil) {
+        _currentHexagon = hexagon;
+        [_selectedHexagons addObject:hexagon];
+        hexagon.scale = 1.2f;
+    }
+}
+
+- (void) touchEnded:(UITouch *)touch withEvent:(UIEvent *)event {
+    // Remove the Hexagon(s) that was touched
+    for (int i = 0; i < [_selectedHexagons count]; i++) {
+        [_selectedHexagons[i] removeFromParent];
+    }
 }
 
 
@@ -200,7 +230,5 @@ static const int GRID_SIDE = 5;
         return nil;
     }
 }
-
-
 
 @end

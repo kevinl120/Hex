@@ -11,7 +11,16 @@
 #import "Grid.h"
 
 
-@implementation Gameplay
+@implementation Gameplay {
+    Grid *_grid;
+    CCLabelTTF *_instructions;
+}
+
+- (void) resetGrid {
+    // Reload the level to reset the grid
+    [[CCDirector sharedDirector] replaceScene: [CCBReader loadAsScene:@"Gameplay"]];
+}
+
 
 
 @end
