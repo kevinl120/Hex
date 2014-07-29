@@ -13,12 +13,22 @@
 
 @implementation Gameplay {
     Grid *_grid;
-    CCLabelTTF *_instructions;
+    
+    CCLabelTTF *_scoreLabel;
 }
+
+- (void) didLoadFromCCB {
+    [self schedule:@selector(setScore) interval:0.1];
+}
+
 
 - (void) resetGrid {
     // Reload the level to reset the grid
     [[CCDirector sharedDirector] replaceScene: [CCBReader loadAsScene:@"Gameplay"]];
+}
+
+- (void) setScore {    
+    _scoreLabel.string = [NSString stringWithFormat:@"$%d", _grid.score];
 }
 
 

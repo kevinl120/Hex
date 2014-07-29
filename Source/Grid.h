@@ -10,4 +10,6 @@
 
 @interface Grid : CCSprite
 
+@property (nonatomic, assign) int score;
+
 @end
