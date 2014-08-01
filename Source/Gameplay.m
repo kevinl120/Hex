@@ -9,6 +9,7 @@
 #import "Gameplay.h"
 
 #import "Grid.h"
+#import "Recap.h"
 
 
 @implementation Gameplay {
@@ -18,6 +19,7 @@
 }
 
 - (void) didLoadFromCCB {
+    _time = 0;
     [self schedule:@selector(setScore) interval:0.1];
 }
 
@@ -27,8 +29,20 @@
     [[CCDirector sharedDirector] replaceScene: [CCBReader loadAsScene:@"Gameplay"]];
 }
 
-- (void) setScore {    
-    _scoreLabel.string = [NSString stringWithFormat:@"$%d", _grid.score];
+- (void) setScore {
+    _time += 0.1;
+    
+    _scoreLabel.string = [NSString stringWithFormat:@"%d", _grid.score];
+    if (_grid.score >= 250) {
+        [self unschedule:@selector(setScore)];
+        CCScene *scene = [CCBReader loadAsScene:@"Recap"];
+        Recap *recapScreen = (Recap *)scene.children[0];
+        recapScreen.positionType = CCPositionTypeNormalized;
+        recapScreen.position = ccp(0, 0);
+        [[CCDirector sharedDirector] replaceScene:scene];
+        recapScreen.finalTime.string = [NSString stringWithFormat:@"%f", _time];
+        
+    }
 }
 
 

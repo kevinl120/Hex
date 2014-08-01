@@ -10,8 +10,10 @@
 
 #import "Hexagon.h"
 
-// Grid dimensions
+// Grid dimensions. Should not be set to more than 6. Code optimized for 5.
 static const int GRID_CIRCLES = 5;
+
+static const int COLORS = 3;
 
 @implementation Grid {
     // Declare the array for the grid
@@ -23,6 +25,10 @@ static const int GRID_CIRCLES = 5;
     float _hexagonHeight;
     float _hexagonRadius;
     
+    // A boolean used to determine if fillEmptySpaces needs to be run again
+    BOOL _runAgain;
+    
+    // A variable for the current hexagon (Used to make sure no hexagon is interacted with multiple times on a single tap)
     Hexagon *_currentHexagon;
 }
 
@@ -33,6 +39,8 @@ static const int GRID_CIRCLES = 5;
 
 
 - (void) didLoadFromCCB {
+    //[super onEnter];
+    
     // Setup the Grid
     [self setupGrid];
 
@@ -42,14 +50,16 @@ static const int GRID_CIRCLES = 5;
     // Make it look better (optional) :P
     self.opacity = 0.00f;
     
-    // Set the score to zero
+    // Set the score and moves to zero
     _score = 0;
+    
+    _runAgain = true;
 }
 
 
 - (void) setupGrid {
-    // Declare the variables used in this function
-    int hexagonsInCurrentCircle = 0;
+    // The number of hexagons in the circle that is being interacted with
+    NSInteger hexagonsInCurrentCircle = 0;
     
     
     // Initialize the array for the grid as a blank NSMutableArray. It will be turned into a 2-d array later.
@@ -67,8 +77,6 @@ static const int GRID_CIRCLES = 5;
     // x and y are the positions of the hexagons that will be initialized later. The starting position is the center of the grid.
     float x = self.contentSizeInPoints.width/2;
     float y = self.contentSizeInPoints.height/2;
-    // Used in positioning hexagon.
-    
     
     // Loops a number of times equal to the number of circles in the grid.
     // The current circle number is the variable "i"
@@ -81,17 +89,15 @@ static const int GRID_CIRCLES = 5;
             // Load the hexagon onto the screen
             Hexagon *hexagon = (Hexagon*)[CCBReader load:@"Hexagon"];
             hexagon.positionInPoints = ccp(x, y);
+            hexagon.scale = 0.06f;
             [self addChild:hexagon];
             
+            // Save the circle and number of the hexagon
+            hexagon.circle = i;
+            hexagon.hexagonNumber = j;
+            
             // Give the hexagon a random color
-            int randomInt = arc4random() % 3;
-            if (randomInt == 1) {
-                hexagon.color = [CCColor cyanColor];
-            } else if (randomInt == 2) {
-                hexagon.color = [CCColor greenColor];
-            } else if (randomInt == 0) {
-                hexagon.color = [CCColor blueColor];
-            }
+            hexagon.color = [self giveRandomColor:COLORS];
             
             // Add the hexagon to the temporary array
             [circleArray addObject:hexagon];
@@ -142,29 +148,38 @@ static const int GRID_CIRCLES = 5;
     CGPoint touchLocation = [touch locationInNode:self];
     
     // Get the Hexagon at that location
-    Hexagon *hexagon = [self hexagonForTouchPosition:touchLocation];
+    Hexagon *hexagon = [self hexagonForGivenPosition:touchLocation];
     
+    // Add the hexagon to the array of hexagons that are scheduled to be removed. Highlight the hexagon to show that it has been scheduled to be removed.
     if (hexagon != nil) {
-        hexagon.scale = 1.2f;
+        hexagon.scale = 0.08f;
         _currentHexagon = hexagon;
         [_selectedHexagons addObject:hexagon];
     }
+    
 }
 
 
 - (void) touchMoved:(UITouch *)touch withEvent:(UIEvent *)event {
-    
+    // Get the x and y coordinates of the touch
     CGPoint touchLocation = [touch locationInNode:self];
     
-    Hexagon *hexagon = [self hexagonForTouchPosition:touchLocation];
+    // Get the hexagon at that location
+    Hexagon *hexagon = [self hexagonForGivenPosition:touchLocation];
     
-    if ([_selectedHexagons containsObject:hexagon] && ![_currentHexagon isEqual:hexagon]) {
-        _currentHexagon = [_selectedHexagons lastObject];
-        _currentHexagon.scale = 1.0f;
+    // If user drags back onto previous hexagon that was selected, deselect the last hexagon added and "un"-highlight it.
+    if ([_selectedHexagons containsObject:hexagon] && [_selectedHexagons indexOfObject:hexagon] == ([_selectedHexagons count] - 2) && ![_currentHexagon isEqual:hexagon]) {
+        
+        Hexagon *temporaryHexagon = [_selectedHexagons lastObject];
+        temporaryHexagon.scale = 0.06f;
         [_selectedHexagons removeLastObject];
         _currentHexagon = hexagon;
-    } else if (![_currentHexagon isEqual:hexagon] && hexagon != nil && sqrtf(powf(_currentHexagon.positionInPoints.x - hexagon.positionInPoints.x, 2) + (powf(_currentHexagon.positionInPoints.y - hexagon.positionInPoints.y, 2))) <= _hexagonHeight+1 && [_currentHexagon.color isEqual:hexagon.color]) {
-        hexagon.scale = 1.2f;
+    }
+    
+    // Otherwise, if user drags onto a new hexagon that is adjacent to the previous hexagon, has the same color, and is not equal to nil, schedule the new hexagon to be removed and highlight it.
+    else if (![_currentHexagon isEqual:hexagon] && hexagon != nil && sqrtf(powf(_currentHexagon.positionInPoints.x - hexagon.positionInPoints.x, 2) + (powf(_currentHexagon.positionInPoints.y - hexagon.positionInPoints.y, 2))) <= _hexagonHeight+1 && [_currentHexagon.color isEqual:hexagon.color] && ![_selectedHexagons containsObject:hexagon]) {
+        
+        hexagon.scale = 0.08f;
         _currentHexagon = hexagon;
         [_selectedHexagons addObject:hexagon];
     }
@@ -172,28 +187,41 @@ static const int GRID_CIRCLES = 5;
 
 
 - (void) touchEnded:(UITouch *)touch withEvent:(UIEvent *)event {
-    for (int i = 0; i < [_selectedHexagons count]; i++) {
-        [_selectedHexagons[i] removeFromParent];
+    
+    if ([_selectedHexagons count] > 1) {
+        [self findPattern];
+        [self removeHexagons];
+        while (_runAgain) {
+            [self fillEmptySpaces];
+        }
+        _runAgain =
+        _score += (float)(([_selectedHexagons count]+1)/2.0f) * [_selectedHexagons count];
+        [_selectedHexagons removeAllObjects];
+
+    } else if ([_selectedHexagons count] == 0) {
+        
+    } else {
+        Hexagon *hexagon = _selectedHexagons[0];
+        hexagon.scale = 0.06f;
+        [_selectedHexagons removeAllObjects];
     }
-    _score += (float)(([_selectedHexagons count]+1)/2.0f) * [_selectedHexagons count];
-    [_selectedHexagons removeAllObjects];
 }
 
 
-- (Hexagon *) hexagonForTouchPosition:(CGPoint)touchPosition {
+- (Hexagon *) hexagonForGivenPosition:(CGPoint)givenPosition {
     
-    int circle = 0;
-    int hexagonNumber = 0;
+    NSInteger circle = 0;
+    NSInteger hexagonNumber = 0;
     
     // Get the circle that was touched
-    circle = ((sqrtf((powf(self.contentSizeInPoints.width/2 - touchPosition.x, 2)) + (powf(self.contentSizeInPoints.height/2 -  touchPosition.y, 2))) - (_hexagonHeight/2)) / (_hexagonHeight)) + 1;
+    circle = ((sqrtf((powf(self.contentSizeInPoints.width/2 - givenPosition.x, 2)) + (powf(self.contentSizeInPoints.height/2 -  givenPosition.y, 2))) - (_hexagonHeight/2)) / (_hexagonHeight)) + 1;
     
     // Create two temporary variables used to find the hexagon number
     float positionX = self.contentSizeInPoints.width/2;
     float positionY = (self.contentSizeInPoints.height - ((GRID_CIRCLES - circle) * _hexagonHeight)) + _hexagonHeight/2;
     
     // Move the temporary position variables until they are inside the same hexagon that was touched
-    while ((sqrtf(powf(positionX - touchPosition.x, 2) + powf(positionY - touchPosition.y, 2))) > (1.5) * _hexagonRadius) {
+    while ((sqrtf(powf(positionX - givenPosition.x, 2) + powf(positionY - givenPosition.y, 2))) > _hexagonRadius) {
         if (hexagonNumber < circle){
             positionY -= (0.5) * _hexagonHeight;
             positionX += (1.5) * _hexagonRadius;
@@ -220,10 +248,138 @@ static const int GRID_CIRCLES = 5;
     
     // Return nil if any value is below zero, or if the circle was greater than the total number of circles in the grid
     if (circle >= GRID_CIRCLES || circle <= 0 || hexagonNumber < 0) {
+        
         return nil;
+        
     }
+    
+    if (circle != 0) {
+        return _gridArray[circle][hexagonNumber];
+    }
+}
 
-    return _gridArray[circle][hexagonNumber];
+
+- (void) removeHexagons {
+    float durationOfAnimation = 0.5f;
+    
+    for (int i = 0; i < [_selectedHexagons count]; i++) {
+        Hexagon *temporaryHexagon = _selectedHexagons[i];
+        
+//        // Animations that occur when a hexagon is removed.
+//        CCActionScaleTo *scaleHexagon = [CCActionScaleTo actionWithDuration:durationOfAnimation scale:0.001f];
+//        CCActionRotateBy *rotateHexagon = [CCActionRotateBy actionWithDuration:durationOfAnimation angle:180.f];
+//        CCActionFadeTo *fadeHexagon = [CCActionFadeTo actionWithDuration:durationOfAnimation];
+//
+//        [temporaryHexagon runAction:scaleHexagon];
+//        [temporaryHexagon runAction:rotateHexagon];
+//        [temporaryHexagon runAction:fadeHexagon];
+        
+        temporaryHexagon.removed = true;
+    }
+}
+
+
+- (void) fillEmptySpaces {
+    
+    _runAgain = false;
+    
+    for (int i = 0; i < 6; i++) {
+        for (int j = (GRID_CIRCLES - 1); j > 0; j--) {
+            int circle = j;
+            int hexagonNumber = circle * i;
+            
+            Hexagon *temporaryHexagon = _gridArray[circle][hexagonNumber];
+            
+            if (temporaryHexagon.removed) {
+                if (temporaryHexagon.circle == (GRID_CIRCLES - 1)) {
+                    temporaryHexagon.color = [self giveRandomColor:COLORS];
+                    temporaryHexagon.scale = 0.06f;
+                    temporaryHexagon.removed = false;
+                } else {
+                    Hexagon *anotherTemporaryHexagon = _gridArray[circle + 1][(circle + 1) * i];
+                    temporaryHexagon.color = anotherTemporaryHexagon.color;
+                    
+                    temporaryHexagon.scale = 0.06f;
+                    anotherTemporaryHexagon.removed = true;
+                    temporaryHexagon.removed = false;
+                    
+                    _runAgain = true;
+                }
+                
+            }
+            
+        }
+    }
+    
+    for (int i = 0; i < 24; i++) {
+        if (i % 4 != 0) {
+            Hexagon *temporaryHexagon = _gridArray[GRID_CIRCLES - 1][i];
+            if (temporaryHexagon.removed) {
+                temporaryHexagon.color = [self giveRandomColor:COLORS];
+                temporaryHexagon.scale = 0.06f;
+                temporaryHexagon.removed = false;
+            }
+        }
+    }
+    
+    NSInteger temporaryInteger = 1;
+    for (int i = 0; i < 18; i++) {
+        if (i % 3 != 0) {
+            temporaryInteger += 2;
+            Hexagon *temporaryHexagon = _gridArray[GRID_CIRCLES-2][i];
+            if (temporaryHexagon.removed) {
+                Hexagon *anotherTemporaryHexagon;
+                if (temporaryInteger > 23) {
+                   anotherTemporaryHexagon = _gridArray[GRID_CIRCLES - 1][23];
+                } else {
+                    anotherTemporaryHexagon = _gridArray[GRID_CIRCLES-1][temporaryInteger];
+                }
+                temporaryHexagon.color = anotherTemporaryHexagon.color;
+                temporaryHexagon.scale = 0.06f;
+                temporaryHexagon.removed = false;
+                anotherTemporaryHexagon.removed = true;
+                _runAgain = true;
+            }
+        }
+    }
+    
+    
+    
+    
+    
+    
+}
+
+
+- (CCColor *) giveRandomColor:(NSInteger)numberOfColors {
+    // Return a random color
+    
+    NSInteger randomInt = arc4random() % numberOfColors;
+    
+    switch (randomInt) {
+        case 0:
+            return [CCColor cyanColor];
+        case 1:
+            return [CCColor greenColor];
+        case 2:
+            return [CCColor blueColor];
+        case 3:
+            return [CCColor magentaColor];
+        case 4:
+            return [CCColor redColor];
+        default:
+            return [CCColor blackColor];
+    }
+}
+
+
+- (void) findPattern {
+    CCLabelTTF *triangleLabel = [CCLabelTTF labelWithString:@"Triangle" fontName:@"Helvetica" fontSize:20];
+    [self addChild:triangleLabel];
+    triangleLabel.positionInPoints = ccp(self.contentSizeInPoints.width/2   , self.contentSizeInPoints.height/2);
+    CCActionFadeOut *fadeText = [CCActionFadeOut actionWithDuration:0.5f];
+    [triangleLabel runAction:fadeText];
+    [triangleLabel removeFromParent];
 }
 
 @end

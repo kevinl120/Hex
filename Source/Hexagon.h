@@ -10,6 +10,11 @@
 
 @interface Hexagon : CCSprite
 
+// Variables that determine the position of the hexagon
+@property (nonatomic, assign) int circle;
+@property (nonatomic, assign) int hexagonNumber;
 
+// Variable to store if the hexagon was removed
+@property (nonatomic, assign) BOOL removed;
 
 @end

@@ -10,4 +10,6 @@
 
 @interface Gameplay : CCNode
 
+@property (nonatomic, assign) float time;
+
 @end
