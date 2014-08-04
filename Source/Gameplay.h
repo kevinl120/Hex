@@ -12,4 +12,6 @@
 
 @property (nonatomic, assign) float time;
 
+@property (nonatomic, assign) int Gameplaygamemode;
+
 @end

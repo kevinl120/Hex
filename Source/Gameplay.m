@@ -12,6 +12,7 @@
 #import "Recap.h"
 
 
+
 @implementation Gameplay {
     Grid *_grid;
     
@@ -30,6 +31,11 @@
 }
 
 - (void) setScore {
+    
+    if (_Gameplaygamemode == 2) {
+        _grid.gamemode = 2;
+    }
+    
     _time += 0.1;
     
     _scoreLabel.string = [NSString stringWithFormat:@"%d", _grid.score];

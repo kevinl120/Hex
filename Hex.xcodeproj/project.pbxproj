@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		1E890782198C392D008B192B /* Recap.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E890781198C392D008B192B /* Recap.m */; };
+		1E890786198C55A3008B192B /* Recap2.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E890785198C55A3008B192B /* Recap2.m */; };
 		1E90D09F19705A1100D48E3B /* Gameplay.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E90D09E19705A1100D48E3B /* Gameplay.m */; };
 		1EB69747196F0DBE007A66E3 /* Grid.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EB69746196F0DBE007A66E3 /* Grid.m */; };
 		1EBE72C9196FA25200C7C179 /* Hexagon.m in Sources */ = {isa = PBXBuildFile; fileRef = 1EBE72C8196FA25200C7C179 /* Hexagon.m */; };
@@ -62,6 +63,8 @@
 /* Begin PBXFileReference section */
 		1E890780198C392D008B192B /* Recap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Recap.h; path = Source/Recap.h; sourceTree = "<group>"; };
 		1E890781198C392D008B192B /* Recap.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Recap.m; path = Source/Recap.m; sourceTree = "<group>"; };
+		1E890784198C55A3008B192B /* Recap2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Recap2.h; path = Source/Recap2.h; sourceTree = "<group>"; };
+		1E890785198C55A3008B192B /* Recap2.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Recap2.m; path = Source/Recap2.m; sourceTree = "<group>"; };
 		1E90D09D19705A1100D48E3B /* Gameplay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Gameplay.h; path = Source/Gameplay.h; sourceTree = "<group>"; };
 		1E90D09E19705A1100D48E3B /* Gameplay.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Gameplay.m; path = Source/Gameplay.m; sourceTree = "<group>"; };
 		1EB69745196F0DBE007A66E3 /* Grid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Grid.h; path = Source/Grid.h; sourceTree = "<group>"; };
@@ -145,6 +148,8 @@
 				1E890781198C392D008B192B /* Recap.m */,
 				1EB69745196F0DBE007A66E3 /* Grid.h */,
 				1EB69746196F0DBE007A66E3 /* Grid.m */,
+				1E890784198C55A3008B192B /* Recap2.h */,
+				1E890785198C55A3008B192B /* Recap2.m */,
 				1EBE72C7196FA25200C7C179 /* Hexagon.h */,
 				1EBE72C8196FA25200C7C179 /* Hexagon.m */,
 				B7378992180767190076A88C /* MainScene.h */,
@@ -360,6 +365,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1E890786198C55A3008B192B /* Recap2.m in Sources */,
 				B737893F1807617C0076A88C /* AppDelegate.m in Sources */,
 				1EBE72C9196FA25200C7C179 /* Hexagon.m in Sources */,
 				B7378994180767190076A88C /* MainScene.m in Sources */,

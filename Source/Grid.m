@@ -9,6 +9,7 @@
 #import "Grid.h"
 
 #import "Hexagon.h"
+#import "Recap2.h"
 
 // Grid dimensions. Should not be set to more than 6. Code optimized for 5.
 static const int GRID_CIRCLES = 5;
@@ -30,6 +31,8 @@ static const int COLORS = 3;
     
     // A variable for the current hexagon (Used to make sure no hexagon is interacted with multiple times on a single tap)
     Hexagon *_currentHexagon;
+    
+    NSInteger _moves;
 }
 
 
@@ -52,6 +55,7 @@ static const int COLORS = 3;
     
     // Set the score and moves to zero
     _score = 0;
+    _moves = 0;
     
     _runAgain = true;
 }
@@ -197,6 +201,17 @@ static const int COLORS = 3;
         _runAgain =
         _score += (float)(([_selectedHexagons count]+1)/2.0f) * [_selectedHexagons count];
         [_selectedHexagons removeAllObjects];
+        if (_gamemode == 2) {
+            _moves++;
+            if (_moves >= 10) {
+                CCScene *scene = [CCBReader loadAsScene:@"Recap2"];
+                Recap2 *recapScreen = (Recap2 *)scene.children[0];
+                recapScreen.positionType = CCPositionTypeNormalized;
+                recapScreen.position = ccp(0, 0);
+                [[CCDirector sharedDirector] replaceScene:scene];
+                recapScreen.finalScore.string = [NSString stringWithFormat:@"%d", _score];
+            }
+        }
 
     } else if ([_selectedHexagons count] == 0) {
         
@@ -376,7 +391,7 @@ static const int COLORS = 3;
 - (void) findPattern {
     CCLabelTTF *triangleLabel = [CCLabelTTF labelWithString:@"Triangle" fontName:@"Helvetica" fontSize:20];
     [self addChild:triangleLabel];
-    triangleLabel.positionInPoints = ccp(self.contentSizeInPoints.width/2   , self.contentSizeInPoints.height/2);
+    triangleLabel.positionInPoints = ccp(self.contentSizeInPoints.width/2, self.contentSizeInPoints.height/2);
     CCActionFadeOut *fadeText = [CCActionFadeOut actionWithDuration:0.5f];
     [triangleLabel runAction:fadeText];
     [triangleLabel removeFromParent];
