@@ -9,9 +9,8 @@
 #import "Grid.h"
 
 #import "Hexagon.h"
-#import "Recap2.h"
 
-// Grid dimensions. Should not be set to more than 6. Code optimized for 5.
+// Grid dimensions. Should not be set to more than 5. Code optimized for 5.
 static const int GRID_CIRCLES = 5;
 
 static const int COLORS = 3;
@@ -31,8 +30,6 @@ static const int COLORS = 3;
     
     // A variable for the current hexagon (Used to make sure no hexagon is interacted with multiple times on a single tap)
     Hexagon *_currentHexagon;
-    
-    NSInteger _moves;
 }
 
 
@@ -42,8 +39,6 @@ static const int COLORS = 3;
 
 
 - (void) didLoadFromCCB {
-    //[super onEnter];
-    
     // Setup the Grid
     [self setupGrid];
 
@@ -55,7 +50,6 @@ static const int COLORS = 3;
     
     // Set the score and moves to zero
     _score = 0;
-    _moves = 0;
     
     _runAgain = true;
 }
@@ -195,24 +189,21 @@ static const int COLORS = 3;
     if ([_selectedHexagons count] > 1) {
         [self findPattern];
         [self removeHexagons];
-        while (_runAgain) {
-            [self fillEmptySpaces];
-        }
-        _runAgain =
         _score += (float)(([_selectedHexagons count]+1)/2.0f) * [_selectedHexagons count];
-        [_selectedHexagons removeAllObjects];
-        if (_gamemode == 2) {
-            _moves++;
-            if (_moves >= 10) {
-                CCScene *scene = [CCBReader loadAsScene:@"Recap2"];
-                Recap2 *recapScreen = (Recap2 *)scene.children[0];
-                recapScreen.positionType = CCPositionTypeNormalized;
-                recapScreen.position = ccp(0, 0);
-                [[CCDirector sharedDirector] replaceScene:scene];
-                recapScreen.finalScore.string = [NSString stringWithFormat:@"%d", _score];
+        
+        CCActionDelay *delayOneSecond = [CCActionDelay actionWithDuration:0.5f];
+        
+        CCActionCallBlock *afterAnimation = [CCActionCallBlock actionWithBlock:^{
+            while (_runAgain) {
+                [self fillEmptySpaces];
             }
-        }
-
+            _runAgain = true;
+            [self addHexagons];
+            [_selectedHexagons removeAllObjects];
+        }];
+        
+        [self runAction:[CCActionSequence actions:delayOneSecond, afterAnimation, nil]];
+    
     } else if ([_selectedHexagons count] == 0) {
         
     } else {
@@ -236,7 +227,7 @@ static const int COLORS = 3;
     float positionY = (self.contentSizeInPoints.height - ((GRID_CIRCLES - circle) * _hexagonHeight)) + _hexagonHeight/2;
     
     // Move the temporary position variables until they are inside the same hexagon that was touched
-    while ((sqrtf(powf(positionX - givenPosition.x, 2) + powf(positionY - givenPosition.y, 2))) > _hexagonRadius) {
+    while ((sqrtf(powf(positionX -  givenPosition.x, 2) + powf(positionY - givenPosition.y, 2))) > _hexagonRadius) {
         if (hexagonNumber < circle){
             positionY -= (0.5) * _hexagonHeight;
             positionX += (1.5) * _hexagonRadius;
@@ -263,12 +254,8 @@ static const int COLORS = 3;
     
     // Return nil if any value is below zero, or if the circle was greater than the total number of circles in the grid
     if (circle >= GRID_CIRCLES || circle <= 0 || hexagonNumber < 0) {
-        
         return nil;
-        
-    }
-    
-    if (circle != 0) {
+    } else {
         return _gridArray[circle][hexagonNumber];
     }
 }
@@ -280,16 +267,27 @@ static const int COLORS = 3;
     for (int i = 0; i < [_selectedHexagons count]; i++) {
         Hexagon *temporaryHexagon = _selectedHexagons[i];
         
-//        // Animations that occur when a hexagon is removed.
-//        CCActionScaleTo *scaleHexagon = [CCActionScaleTo actionWithDuration:durationOfAnimation scale:0.001f];
-//        CCActionRotateBy *rotateHexagon = [CCActionRotateBy actionWithDuration:durationOfAnimation angle:180.f];
-//        CCActionFadeTo *fadeHexagon = [CCActionFadeTo actionWithDuration:durationOfAnimation];
-//
-//        [temporaryHexagon runAction:scaleHexagon];
-//        [temporaryHexagon runAction:rotateHexagon];
-//        [temporaryHexagon runAction:fadeHexagon];
+        // Animations that occur when a hexagon is removed.
+        CCActionScaleTo *scaleHexagon = [CCActionScaleTo actionWithDuration:durationOfAnimation scale:0.00001f];
+        CCActionRotateBy *rotateHexagon = [CCActionRotateBy actionWithDuration:durationOfAnimation angle:180.f];
+        CCActionFadeTo *fadeHexagonOut  = [CCActionFadeTo actionWithDuration:durationOfAnimation];
+
+        [temporaryHexagon runAction:scaleHexagon];
+        [temporaryHexagon runAction:rotateHexagon];
+        [temporaryHexagon runAction:fadeHexagonOut];
         
         temporaryHexagon.removed = true;
+    }
+}
+
+
+- (void) addHexagons {
+    for (int i = 0; i < [_selectedHexagons count]; i++) {
+        Hexagon *temporaryHexagon = _selectedHexagons[i];
+        
+        CCActionFadeIn *fadeHexagonIn = [CCActionFadeIn actionWithDuration:0.5f];
+        
+        [temporaryHexagon runAction:fadeHexagonIn];
     }
 }
 
@@ -320,15 +318,13 @@ static const int COLORS = 3;
                     
                     _runAgain = true;
                 }
-                
             }
-            
         }
     }
     
     for (int i = 0; i < 24; i++) {
         if (i % 4 != 0) {
-            Hexagon *temporaryHexagon = _gridArray[GRID_CIRCLES - 1][i];
+            Hexagon *temporaryHexagon = _gridArray[4][i];
             if (temporaryHexagon.removed) {
                 temporaryHexagon.color = [self giveRandomColor:COLORS];
                 temporaryHexagon.scale = 0.06f;
@@ -340,15 +336,34 @@ static const int COLORS = 3;
     NSInteger temporaryInteger = 1;
     for (int i = 0; i < 18; i++) {
         if (i % 3 != 0) {
-            temporaryInteger += 2;
-            Hexagon *temporaryHexagon = _gridArray[GRID_CIRCLES-2][i];
+            Hexagon *temporaryHexagon = _gridArray[3][i];
             if (temporaryHexagon.removed) {
-                Hexagon *anotherTemporaryHexagon;
-                if (temporaryInteger > 23) {
-                   anotherTemporaryHexagon = _gridArray[GRID_CIRCLES - 1][23];
-                } else {
-                    anotherTemporaryHexagon = _gridArray[GRID_CIRCLES-1][temporaryInteger];
-                }
+                Hexagon *anotherTemporaryHexagon = _gridArray[4][temporaryInteger];
+                temporaryHexagon.color = anotherTemporaryHexagon.color;
+                temporaryHexagon.scale = 0.06f;
+                temporaryHexagon.removed = false;
+                anotherTemporaryHexagon.removed = true;
+                _runAgain = true;
+            }
+            temporaryInteger += 2;
+        }
+    }
+    
+    
+    temporaryInteger = 1;
+    for (int i = 1; i < 12; i += 2) {
+        Hexagon *temporaryHexagon = _gridArray[2][i];
+        if (temporaryHexagon.removed) {
+            NSInteger randomInt = arc4random() % 2;
+            if (randomInt == 0) {
+                Hexagon *anotherTemporaryHexagon = _gridArray[3][temporaryInteger];
+                temporaryHexagon.color = anotherTemporaryHexagon.color;
+                temporaryHexagon.scale = 0.06f;
+                temporaryHexagon.removed = false;
+                anotherTemporaryHexagon.removed = true;
+                _runAgain = true;
+            } else if (randomInt == 1) {
+                Hexagon *anotherTemporaryHexagon = _gridArray[3][temporaryInteger + 1];
                 temporaryHexagon.color = anotherTemporaryHexagon.color;
                 temporaryHexagon.scale = 0.06f;
                 temporaryHexagon.removed = false;
@@ -356,13 +371,8 @@ static const int COLORS = 3;
                 _runAgain = true;
             }
         }
+        temporaryInteger += 3;
     }
-    
-    
-    
-    
-    
-    
 }
 
 
@@ -389,12 +399,16 @@ static const int COLORS = 3;
 
 
 - (void) findPattern {
-    CCLabelTTF *triangleLabel = [CCLabelTTF labelWithString:@"Triangle" fontName:@"Helvetica" fontSize:20];
-    [self addChild:triangleLabel];
-    triangleLabel.positionInPoints = ccp(self.contentSizeInPoints.width/2, self.contentSizeInPoints.height/2);
-    CCActionFadeOut *fadeText = [CCActionFadeOut actionWithDuration:0.5f];
-    [triangleLabel runAction:fadeText];
-    [triangleLabel removeFromParent];
+//    CCLabelTTF *triangleLabel = [CCLabelTTF labelWithString:@"Triangle" fontName:@"Helvetica" fontSize:20];
+//    [self addChild:triangleLabel];
+//    triangleLabel.positionInPoints = ccp(self.contentSizeInPoints.width/2, self.contentSizeInPoints.height/2);
+//    CCActionFadeOut *fadeText = [CCActionFadeOut actionWithDuration:0.5f];
+//    [triangleLabel runAction:fadeText];
+//    [triangleLabel removeFromParent];
+}
+
+- (void) doNothing {
+    
 }
 
 @end

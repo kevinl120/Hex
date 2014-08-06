@@ -12,6 +12,4 @@
 
 @property (nonatomic, assign) int score;
 
-@property (nonatomic, assign) int gamemode;
-
 @end

@@ -5,7 +5,7 @@
 //  Created by Kevin Li on 7/11/14.
 //  Copyright (c) 2014 Apportable. All rights reserved.
 //
-
+ 
 #import "Gameplay.h"
 
 #import "Grid.h"
@@ -31,11 +31,6 @@
 }
 
 - (void) setScore {
-    
-    if (_Gameplaygamemode == 2) {
-        _grid.gamemode = 2;
-    }
-    
     _time += 0.1;
     
     _scoreLabel.string = [NSString stringWithFormat:@"%d", _grid.score];
