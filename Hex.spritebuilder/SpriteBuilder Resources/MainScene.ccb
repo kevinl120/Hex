@@ -411,8 +411,8 @@
 							<real>0.0</real>
 							<real>0.0</real>
 							<integer>0</integer>
-							<integer>0</integer>
-							<integer>0</integer>
+							<integer>2</integer>
+							<integer>2</integer>
 						</array>
 					</dict>
 					<dict>
@@ -493,8 +493,6 @@
 						<true/>
 					</dict>
 				</array>
-				<key>selected</key>
-				<true/>
 			</dict>
 		</array>
 		<key>customClass</key>
@@ -578,13 +576,13 @@
 			<key>ext</key>
 			<string>phone</string>
 			<key>height</key>
-			<integer>320</integer>
+			<integer>568</integer>
 			<key>name</key>
-			<string>Phone Landscape</string>
+			<string>Phone Portrait</string>
 			<key>scale</key>
 			<real>1</real>
 			<key>width</key>
-			<integer>568</integer>
+			<integer>320</integer>
 		</dict>
 		<dict>
 			<key>centeredOrigin</key>
@@ -592,13 +590,13 @@
 			<key>ext</key>
 			<string>tablet phonehd</string>
 			<key>height</key>
-			<integer>384</integer>
+			<integer>512</integer>
 			<key>name</key>
-			<string>Tablet Landscape</string>
+			<string>Tablet Portrait</string>
 			<key>scale</key>
 			<real>2</real>
 			<key>width</key>
-			<integer>512</integer>
+			<integer>384</integer>
 		</dict>
 		<dict>
 			<key>centeredOrigin</key>
@@ -606,13 +604,13 @@
 			<key>ext</key>
 			<string>phone</string>
 			<key>height</key>
-			<integer>320</integer>
+			<integer>480</integer>
 			<key>name</key>
-			<string>Phone Landscape (short)</string>
+			<string>iPhone Portrait (short)</string>
 			<key>scale</key>
 			<real>1</real>
 			<key>width</key>
-			<integer>480</integer>
+			<integer>320</integer>
 		</dict>
 	</array>
 	<key>sequences</key>

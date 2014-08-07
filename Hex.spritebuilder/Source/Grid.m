@@ -266,7 +266,7 @@ static const int COLORS = 3;
     
     for (int i = 0; i < [_selectedHexagons count]; i++) {
         Hexagon *temporaryHexagon = _selectedHexagons[i];
-        
+
         // Animations that occur when a hexagon is removed.
         CCActionScaleTo *scaleHexagon = [CCActionScaleTo actionWithDuration:durationOfAnimation scale:0.00001f];
         CCActionRotateBy *rotateHexagon = [CCActionRotateBy actionWithDuration:durationOfAnimation angle:180.f];
@@ -405,10 +405,6 @@ static const int COLORS = 3;
 //    CCActionFadeOut *fadeText = [CCActionFadeOut actionWithDuration:0.5f];
 //    [triangleLabel runAction:fadeText];
 //    [triangleLabel removeFromParent];
-}
-
-- (void) doNothing {
-    
 }
 
 @end
