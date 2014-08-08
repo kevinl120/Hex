@@ -10,6 +10,6 @@
 
 @interface Grid : CCSprite
 
-@property (nonatomic, assign) int score;
+- (void) determineSpriteFrame:(NSInteger)circles;
 
 @end

@@ -142,18 +142,18 @@
 			children = (
 				B737893D1807617C0076A88C /* AppDelegate.h */,
 				B737893E1807617C0076A88C /* AppDelegate.m */,
+				1EA1D2FA1991748500C1431A /* GamemodeScrollview.h */,
+				1EA1D2FB1991748500C1431A /* GamemodeScrollview.m */,
 				1E90D09D19705A1100D48E3B /* Gameplay.h */,
 				1E90D09E19705A1100D48E3B /* Gameplay.m */,
-				1E890780198C392D008B192B /* Recap.h */,
-				1E890781198C392D008B192B /* Recap.m */,
 				1EB69745196F0DBE007A66E3 /* Grid.h */,
 				1EB69746196F0DBE007A66E3 /* Grid.m */,
 				1EBE72C7196FA25200C7C179 /* Hexagon.h */,
 				1EBE72C8196FA25200C7C179 /* Hexagon.m */,
 				B7378992180767190076A88C /* MainScene.h */,
 				B7378993180767190076A88C /* MainScene.m */,
-				1EA1D2FA1991748500C1431A /* GamemodeScrollview.h */,
-				1EA1D2FB1991748500C1431A /* GamemodeScrollview.m */,
+				1E890780198C392D008B192B /* Recap.h */,
+				1E890781198C392D008B192B /* Recap.m */,
 			);
 			name = Source;
 			sourceTree = "<group>";
