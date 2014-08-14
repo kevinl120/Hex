@@ -3,7 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>cocos2dUpdateIgnoredVersions</key>
-	<array/>
+	<array>
+		<string>3.2.0</string>
+	</array>
 	<key>defaultOrientation</key>
 	<integer>1</integer>
 	<key>designTarget</key>
@@ -100,6 +102,8 @@
 			<key>scaleFrom</key>
 			<integer>2</integer>
 		</dict>
+		<key>Resources/GearPolished.png</key>
+		<dict/>
 		<key>Sprites</key>
 		<dict/>
 		<key>Temporary Resources/HexGrid2.png</key>

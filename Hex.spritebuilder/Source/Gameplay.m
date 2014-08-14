@@ -14,7 +14,7 @@
 
 // Grid dimensions. Circles should not be set to more than 5.
 static const int GRID_CIRCLES = 5;
-static const int COLORS = 3;
+static const int COLORS = 6;
 
 // Hexagon dimensions
 static const float _hexagonHeight = 40;
@@ -43,7 +43,9 @@ static const float _hexagonRadius = ((_hexagonHeight * (1.732050808)) / 3);
 #pragma mark Setup
 // -----------------------------------------------------------------------
 
-- (void) didLoadFromCCB {
+- (void) onEnterTransitionDidFinish {
+    
+    [super onEnterTransitionDidFinish];
     
     // Set up the grid
     [self setupGrid];
@@ -56,6 +58,7 @@ static const float _hexagonRadius = ((_hexagonHeight * (1.732050808)) / 3);
 }
 
 - (void) setupGrid {
+    
     // Find the center of the screen
     _center = ccp([CCDirector sharedDirector].viewSize.width/2, [CCDirector sharedDirector].viewSize.height/2);
     
@@ -83,23 +86,40 @@ static const float _hexagonRadius = ((_hexagonHeight * (1.732050808)) / 3);
         // Initialize a temporary array used to turn "_gridArray" into a 2-d array
         NSMutableArray *circleArray = [[NSMutableArray alloc] init];
         
+        NSMutableArray *hexagonLoadActions = [[NSMutableArray alloc] init];
+        
         // Loops a number of times equal to the number of hexagons in the current circle
         for (int j = 0; j < (i * 6); j++) {
-            // Load the hexagon on to the screen
-            Hexagon *hexagon = (Hexagon *)[CCBReader load:@"Hexagon"];
-            hexagon.positionInPoints = hexagonPosition;
-            hexagon.scale = 0.06f;
-            [self addChild:hexagon];
             
-            // Save the circle and number of the hexagon
-            hexagon.circle = i;
-            hexagon.hexagonNumber = j;
+            CCActionDelay *delayAction = [CCActionDelay actionWithDuration:0.04];
             
-            // Give the hexagon a random color
-            hexagon.color = [self giveRandomColor:COLORS];
+            CCActionCallBlock *action = [CCActionCallBlock actionWithBlock:^{
+                // Load the hexagon on to the screen
+                Hexagon *hexagon = (Hexagon *)[CCBReader load:@"Hexagon"];
+                hexagon.positionInPoints = hexagonPosition;
+                hexagon.scale = 0.04f;
+                [self addChild:hexagon];
+                
+                CCActionFadeIn *fadeHexagon = [CCActionFadeIn actionWithDuration:0.5f];
+                
+                CCActionDelay *anotherDelay = [CCActionDelay actionWithDuration:0.025f];
+                
+                CCActionScaleTo *scaleHexagon = [CCActionScaleTo actionWithDuration:0.5f scale:0.06f];
+                [hexagon runAction:[CCActionSequence actions:fadeHexagon, anotherDelay, scaleHexagon, nil]];
+                
+                // Save the circle and number of the hexagon
+                hexagon.circle = i;
+                hexagon.hexagonNumber = j;
+                
+                // Give the hexagon a random color
+                hexagon.color = [self giveRandomColor:COLORS];
+                
+                // Add the hexagon to the temporary array
+                [circleArray addObject:hexagon];
+            }];
             
-            // Add the hexagon to the temporary array
-            [circleArray addObject:hexagon];
+            [hexagonLoadActions addObject:delayAction];
+            [hexagonLoadActions addObject:action];
             
             // Position the next hexagon.
             if (j < i){
@@ -127,6 +147,11 @@ static const float _hexagonRadius = ((_hexagonHeight * (1.732050808)) / 3);
         // Reposition x and y after all hexagons in the current circle have been initiated
         hexagonPosition = ccp([CCDirector sharedDirector].viewSize.width/2, [CCDirector sharedDirector].viewSize.height/2);
         hexagonPosition.y += (_hexagonHeight * (i + 1));
+        
+        if ([hexagonLoadActions count] > 0) {
+            [self runAction:[CCActionSequence actionWithArray:hexagonLoadActions]];
+        }
+
     }
 }
 
@@ -180,19 +205,6 @@ static const float _hexagonRadius = ((_hexagonHeight * (1.732050808)) / 3);
         _scoreLabel.string = [NSString stringWithFormat:@"%d", _score];
         
         [self removeHexagons];
-        [self fillEmptySpaces];
-        
-        //        CCActionDelay *delayOneSecond = [CCActionDelay actionWithDuration:1.0f];
-        //
-        //        CCActionCallBlock *afterAnimation = [CCActionCallBlock actionWithBlock:^{
-        //
-        //        *****Code block here*****
-        //
-        //        }];
-        //
-        //        [self runAction:[CCActionSequence actions:delayOneSecond, afterAnimation, nil]];
-        
-        
     }
     // Otherwise, if the user selected exactly one hexagon, "un"-highlight that hexagon
     else if ([_selectedHexagons count] == 1) {
@@ -200,6 +212,14 @@ static const float _hexagonRadius = ((_hexagonHeight * (1.732050808)) / 3);
         hexagon.scale = 0.06f;
     }
     // Remove all selected hexagons after a touch ends
+    [_selectedHexagons removeAllObjects];
+}
+
+- (void) touchCancelled:(UITouch *)touch withEvent:(UIEvent *)event {
+    for (int i = 0; i < [_selectedHexagons count]; i++) {
+        Hexagon *hexagon = _selectedHexagons[i];
+        hexagon.scale = 0.06f;
+    }
     [_selectedHexagons removeAllObjects];
 }
 
@@ -259,8 +279,8 @@ static const float _hexagonRadius = ((_hexagonHeight * (1.732050808)) / 3);
         Hexagon *hexagon = _selectedHexagons[i];
         hexagon.removed = true;
     }
+    [self fillEmptySpaces];
 }
-
 
 - (void) fillEmptySpaces {
     do {
@@ -296,6 +316,7 @@ static const float _hexagonRadius = ((_hexagonHeight * (1.732050808)) / 3);
                     hexagon.color = temporaryHexagon.color;
                     hexagon.scale = 0.06f;
                     temporaryHexagon.removed = true;
+                    [self moveConnectedHexagon:temporaryHexagon toOtherHexagon:hexagon];
                     hexagon.removed = false;
                     
                     _runAgain = true;
@@ -332,6 +353,7 @@ static const float _hexagonRadius = ((_hexagonHeight * (1.732050808)) / 3);
                 hexagon.scale = 0.06f;
                 hexagon.removed = false;
                 temporaryHexagon.removed = true;
+                [self moveConnectedHexagon:temporaryHexagon toOtherHexagon:hexagon];
                 _runAgain = true;
             }
             temporaryInteger += 2;
@@ -358,12 +380,36 @@ static const float _hexagonRadius = ((_hexagonHeight * (1.732050808)) / 3);
                 hexagon.scale = 0.06f;
                 hexagon.removed = false;
                 temporaryHexagon.removed = true;
+                [self moveConnectedHexagon:temporaryHexagon toOtherHexagon:hexagon];
                 _runAgain = true;
             }
         }
         temporaryInteger += 3;
     }
 }
+
+// -----------------------------------------------------------------------
+#pragma mark Animations
+// -----------------------------------------------------------------------
+
+- (void) moveConnectedHexagon:(Hexagon *)hexagonToAnimate toOtherHexagon:(Hexagon *)hexagonToMoveTo {
+    hexagonToMoveTo.opacity = 0.0f;
+    CGPoint lastHexagonPosition = hexagonToAnimate.position;
+    CCActionMoveTo *moveHexagon = [CCActionMoveTo actionWithDuration:0.5f position:hexagonToMoveTo.position];
+    
+    CCActionDelay *delay = [CCActionDelay actionWithDuration:0.55f];
+    
+    CCActionCallBlock *actionAfterAnimation = [CCActionCallBlock actionWithBlock:^{
+        hexagonToAnimate.position = lastHexagonPosition;
+        CCActionFadeIn *fadeHexagonIn = [CCActionFadeIn actionWithDuration:0.3f];
+        [hexagonToAnimate runAction:fadeHexagonIn];
+        hexagonToMoveTo.opacity = 1.0f;
+    }];
+    
+    [hexagonToAnimate runAction:[CCActionSequence actions:moveHexagon, delay, actionAfterAnimation, nil]];
+}
+
+
 
 
 // -----------------------------------------------------------------------
@@ -382,19 +428,22 @@ static const float _hexagonRadius = ((_hexagonHeight * (1.732050808)) / 3);
 - (CCColor *) giveRandomColor:(NSInteger)numberOfColors {
     // Return a random color
     
+    //NSInteger randomInt = 4;
     NSInteger randomInt = arc4random() % numberOfColors;
     
     switch (randomInt) {
         case 0:
-            return [CCColor cyanColor];
+            return [CCColor colorWithRed:0.f green:1.f blue:1.f alpha:1.f];
         case 1:
-            return [CCColor greenColor];
+            return [CCColor colorWithRed:0.f green:0.8f blue:0.f alpha:1.f];
         case 2:
-            return [CCColor blueColor];
+            return [CCColor colorWithRed:1.f green:0.f blue:0.f alpha:1.f];
         case 3:
-            return [CCColor magentaColor];
+            return [CCColor colorWithRed:1.f green:0.65f blue:0.f alpha:1.f];
         case 4:
-            return [CCColor redColor];
+            return [CCColor colorWithRed:0.75f green:1.f blue:0.f alpha:1.f];
+        case 5:
+            return [CCColor colorWithRed:0.6f green:0.6f blue:1.f alpha:1.f];
         default:
             return [CCColor blackColor];
     }

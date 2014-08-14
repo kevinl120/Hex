@@ -10,6 +10,5 @@
 
 @interface Recap : CCNode
 
-@property (nonatomic, strong) CCLabelTTF *finalTime;
 
 @end
