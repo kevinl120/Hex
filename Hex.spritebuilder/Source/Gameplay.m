@@ -32,6 +32,9 @@ static const float _highlightedHexagonScale = 0.16;
     Hexagon *_currentHexagon;
     
     BOOL _runAgain;
+    BOOL _started;
+    
+    CCLabelTTF *_timeOrMoves;
     
     CCLabelTTF *_scoreLabel;
     NSInteger _score;
@@ -46,18 +49,39 @@ static const float _highlightedHexagonScale = 0.16;
 #pragma mark Setup
 // -----------------------------------------------------------------------
 
+
 - (void) onEnterTransitionDidFinish {
     
     [super onEnterTransitionDidFinish];
     
+    // Set up scoring system
+    [self setupScore];
+    
     // Set up the grid
     [self setupGrid];
     
-    // Set the score and time to zero
+    self.userInteractionEnabled = true;
+}
+
+- (void) setupScore {
+    _started = false;
+    
+    // Set the score and time
     _score = 0;
     _time = 0;
     
-    self.userInteractionEnabled = true;
+    if (_gamemode == 1) {
+        _time = 60;
+        NSInteger temporaryTime = _time;
+        _timeLabel.string = [NSString stringWithFormat:@"%ld", (long)temporaryTime];
+        [self schedule:@selector(timerUpdate) interval:0.1f];
+    } else if (_gamemode == 2) {
+        _timeOrMoves.string = [NSString stringWithFormat:@"Moves:"];
+        _moves = 20;
+        _timeLabel.string = [NSString stringWithFormat:@"%d", _moves];
+    } else if (_gamemode == 3) {
+        [self schedule:@selector(timerUpdate) interval:0.1f];
+    }
 }
 
 - (void) setupGrid {
@@ -205,8 +229,32 @@ static const float _highlightedHexagonScale = 0.16;
     // If user selected more than one hexagon,
     if ([_selectedHexagons count] > 1) {
         
+        _started = true;
+        
         _score += [_selectedHexagons count];
-        _scoreLabel.string = [NSString stringWithFormat:@"%d", _score];
+        _scoreLabel.string = [NSString stringWithFormat:@"%ld", (long)_score];
+        
+        if (_gamemode == 2) {
+            _moves--;
+            _timeLabel.string = [NSString stringWithFormat:@"%d", _moves];
+            
+            if (_moves <= 0) {
+                
+                NSUserDefaults *_highscoreDefaults = [NSUserDefaults standardUserDefaults];
+                if (_score > [_highscoreDefaults integerForKey:@"movesHighScore"]) {
+                    [_highscoreDefaults setInteger:_score forKey:@"movesHighScore"];
+                }
+                
+                CCTransition *crossFade = [CCTransition transitionCrossFadeWithDuration:1.f];
+                CCScene *recapScene = [CCBReader loadAsScene:@"Recap" owner:self];
+                Recap *recap = (Recap *)recapScene.children[0];
+                recap.positionType = CCPositionTypeNormalized;
+                recap.position = ccp(0, 0);
+                recap.scoreLabel.string = [NSString stringWithFormat:@"%ld", (long)_score];
+                recap.highScoreLabel.string = [NSString stringWithFormat:@"%ld", (long)[_highscoreDefaults integerForKey:@"movesHighScore"]];
+                [[CCDirector sharedDirector] replaceScene:recapScene withTransition:crossFade];
+            }
+        }
         
         [self removeHexagons];
     }
@@ -389,26 +437,10 @@ static const float _highlightedHexagonScale = 0.16;
     }
 }
 
+
 // -----------------------------------------------------------------------
 #pragma mark Animations
 // -----------------------------------------------------------------------
-
-//- (void) moveConnectedHexagon:(Hexagon *)hexagonToAnimate toOtherHexagon:(Hexagon *)hexagonToMoveTo {
-//    hexagonToMoveTo.opacity = 0.0f;
-//    CGPoint lastHexagonPosition = hexagonToAnimate.position;
-//    CCActionMoveTo *moveHexagon = [CCActionMoveTo actionWithDuration:0.5f position:hexagonToMoveTo.position];
-//    
-//    CCActionDelay *delay = [CCActionDelay actionWithDuration:0.55f];
-//    
-//    CCActionCallBlock *actionAfterAnimation = [CCActionCallBlock actionWithBlock:^{
-//        hexagonToAnimate.position = lastHexagonPosition;
-//        CCActionFadeIn *fadeHexagonIn = [CCActionFadeIn actionWithDuration:0.3f];
-//        [hexagonToAnimate runAction:fadeHexagonIn];
-//        hexagonToMoveTo.opacity = 1.0f;
-//    }];
-//    
-//    [hexagonToAnimate runAction:[CCActionSequence actions:moveHexagon, delay, actionAfterAnimation, nil]];
-//}
 
 - (void) animateConnectedHexagon {
     
@@ -423,6 +455,56 @@ static const float _highlightedHexagonScale = 0.16;
 - (void) resetGrid {
     // Reload the level to reset the grid
     [[CCDirector sharedDirector] replaceScene: [CCBReader loadAsScene:@"Gameplay"]];
+}
+
+- (void) timerUpdate {
+    if (_started) {
+        NSInteger temporaryTime = 0;
+        
+        if (_gamemode == 1) {
+            _time -= 0.1;
+            temporaryTime = _time;
+            
+            if (_time <= 0.1) {
+                
+                NSUserDefaults *_highscoreDefaults = [NSUserDefaults standardUserDefaults];
+                if (_score > [_highscoreDefaults integerForKey:@"timeHighScore"]) {
+                    [_highscoreDefaults setInteger:_score forKey:@"timeHighScore"];
+                }
+                
+                CCTransition *crossFade = [CCTransition transitionCrossFadeWithDuration:1.f];
+                CCScene *recapScene = [CCBReader loadAsScene:@"Recap" owner:self];
+                Recap *recap = (Recap *)recapScene.children[0];
+                recap.positionType = CCPositionTypeNormalized;
+                recap.position = ccp(0, 0);
+                recap.scoreLabel.string = [NSString stringWithFormat:@"%ld", (long)_score];
+                recap.highScoreLabel.string = [NSString stringWithFormat:@"%ld", (long)[_highscoreDefaults integerForKey:@"timeHighScore"]];
+                [[CCDirector sharedDirector] replaceScene:recapScene withTransition:crossFade];
+            }
+            
+        } else if (_gamemode == 3) {
+            _time += 0.1;
+            temporaryTime = _time;
+            if (_score >= 100) {
+                
+                NSUserDefaults *_highscoreDefaults = [NSUserDefaults standardUserDefaults];
+                if (temporaryTime < [_highscoreDefaults integerForKey:@"pointsHighScore"]) {
+                    [_highscoreDefaults setInteger:temporaryTime forKey:@"pointsHighScore"];
+                }
+                
+                CCTransition *crossFade = [CCTransition transitionCrossFadeWithDuration:1.f];
+                CCScene *recapScene = [CCBReader loadAsScene:@"Recap" owner:self];
+                Recap *recap = (Recap *)recapScene.children[0];
+                recap.positionType = CCPositionTypeNormalized;
+                recap.position = ccp(0, 0);
+                recap.scoreLabel.string = [NSString stringWithFormat:@"%ld", (long)temporaryTime];
+                recap.highScoreLabel.string = [NSString stringWithFormat:@"%ld", (long)[_highscoreDefaults integerForKey:@"pointsHighScore"]];
+                [[CCDirector sharedDirector] replaceScene:recapScene withTransition:crossFade];
+            }
+        }
+        
+        _timeLabel.string = [NSString stringWithFormat:@"%ld", (long)temporaryTime];
+    }
 }
 
 // -----------------------------------------------------------------------

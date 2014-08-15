@@ -10,5 +10,7 @@
 
 @interface Recap : CCNode
 
+@property (nonatomic, strong) CCLabelTTF* scoreLabel;
+@property (nonatomic, strong) CCLabelTTF* highScoreLabel;
 
 @end

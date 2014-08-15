@@ -10,4 +10,10 @@
 
 @implementation Recap
 
+- (void) menu {
+    CCScene *mainScene = [CCBReader loadAsScene: @"MainScene"];
+    CCTransition *fade = [CCTransition transitionCrossFadeWithDuration:1.f];
+    [[CCDirector sharedDirector] presentScene:mainScene withTransition:fade];
+}
+
 @end

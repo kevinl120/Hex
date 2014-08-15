@@ -11,6 +11,8 @@
 @interface Gameplay : CCNode
 
 @property (nonatomic, assign) float time;
+@property (nonatomic, assign) int score;
+@property (nonatomic, assign) int moves;
 
 @property (nonatomic, assign) int gamemode;
 
