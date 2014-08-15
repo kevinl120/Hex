@@ -10,6 +10,8 @@
 
 @interface Recap : CCNode
 
+@property (nonatomic, assign) int gamemode;
+
 @property (nonatomic, strong) CCLabelTTF* scoreLabel;
 @property (nonatomic, strong) CCLabelTTF* highScoreLabel;
 

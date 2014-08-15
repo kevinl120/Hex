@@ -14,7 +14,7 @@
 
 // Grid dimensions. Circles should not be set to more than 5.
 static const int GRID_CIRCLES = 5;
-static const int COLORS = 6;
+static const int COLORS = 5;
 
 // Hexagon dimensions
 static const float _hexagonHeight = 40;
@@ -26,6 +26,8 @@ static const float _highlightedHexagonScale = 0.16;
 
 @implementation Gameplay {
     Grid *_grid;
+    
+    CCNode *_labelsNode;
     
     NSMutableArray *_gridArray;
     NSMutableArray *_selectedHexagons;
@@ -82,7 +84,12 @@ static const float _highlightedHexagonScale = 0.16;
     } else if (_gamemode == 3) {
         [self schedule:@selector(timerUpdate) interval:0.1f];
     }
-}
+    
+    CCActionMoveTo *moveLabels = [CCActionMoveTo actionWithDuration:1.f position:ccp(0, 0)];
+    CCActionEaseElasticOut *bounceLabels = [CCActionEaseElasticOut actionWithAction:moveLabels];
+    [_labelsNode runAction:bounceLabels];
+    
+    }
 
 - (void) setupGrid {
     
@@ -231,7 +238,7 @@ static const float _highlightedHexagonScale = 0.16;
         
         _started = true;
         
-        _score += [_selectedHexagons count];
+        _score += (([_selectedHexagons count] + 1.0)/2.0) * [_selectedHexagons count];
         _scoreLabel.string = [NSString stringWithFormat:@"%ld", (long)_score];
         
         if (_gamemode == 2) {
@@ -250,6 +257,7 @@ static const float _highlightedHexagonScale = 0.16;
                 Recap *recap = (Recap *)recapScene.children[0];
                 recap.positionType = CCPositionTypeNormalized;
                 recap.position = ccp(0, 0);
+                recap.gamemode = _gamemode;
                 recap.scoreLabel.string = [NSString stringWithFormat:@"%ld", (long)_score];
                 recap.highScoreLabel.string = [NSString stringWithFormat:@"%ld", (long)[_highscoreDefaults integerForKey:@"movesHighScore"]];
                 [[CCDirector sharedDirector] replaceScene:recapScene withTransition:crossFade];
@@ -477,6 +485,7 @@ static const float _highlightedHexagonScale = 0.16;
                 Recap *recap = (Recap *)recapScene.children[0];
                 recap.positionType = CCPositionTypeNormalized;
                 recap.position = ccp(0, 0);
+                recap.gamemode = _gamemode;
                 recap.scoreLabel.string = [NSString stringWithFormat:@"%ld", (long)_score];
                 recap.highScoreLabel.string = [NSString stringWithFormat:@"%ld", (long)[_highscoreDefaults integerForKey:@"timeHighScore"]];
                 [[CCDirector sharedDirector] replaceScene:recapScene withTransition:crossFade];
@@ -485,10 +494,10 @@ static const float _highlightedHexagonScale = 0.16;
         } else if (_gamemode == 3) {
             _time += 0.1;
             temporaryTime = _time;
-            if (_score >= 100) {
+            if (_score >= 250) {
                 
                 NSUserDefaults *_highscoreDefaults = [NSUserDefaults standardUserDefaults];
-                if (temporaryTime < [_highscoreDefaults integerForKey:@"pointsHighScore"]) {
+                if (temporaryTime < [_highscoreDefaults integerForKey:@"pointsHighScore"] || [_highscoreDefaults integerForKey:@"pointsHighScore"] == 0) {
                     [_highscoreDefaults setInteger:temporaryTime forKey:@"pointsHighScore"];
                 }
                 
@@ -497,6 +506,7 @@ static const float _highlightedHexagonScale = 0.16;
                 Recap *recap = (Recap *)recapScene.children[0];
                 recap.positionType = CCPositionTypeNormalized;
                 recap.position = ccp(0, 0);
+                recap.gamemode = _gamemode;
                 recap.scoreLabel.string = [NSString stringWithFormat:@"%ld", (long)temporaryTime];
                 recap.highScoreLabel.string = [NSString stringWithFormat:@"%ld", (long)[_highscoreDefaults integerForKey:@"pointsHighScore"]];
                 [[CCDirector sharedDirector] replaceScene:recapScene withTransition:crossFade];
