@@ -20,6 +20,9 @@ static const int COLORS = 6;
 static const float _hexagonHeight = 40;
 static const float _hexagonRadius = ((_hexagonHeight * (1.732050808)) / 3);
 
+static const float _hexagonScale = 0.12;
+static const float _highlightedHexagonScale = 0.16;
+
 
 @implementation Gameplay {
     Grid *_grid;
@@ -77,7 +80,7 @@ static const float _hexagonRadius = ((_hexagonHeight * (1.732050808)) / 3);
     // Load the first hexagon at the center of the screen
     Hexagon *hexagon = (Hexagon *)[CCBReader load:@"Hexagon"];
     hexagon.positionInPoints = hexagonPosition;
-    hexagon.scale = 0.06f;
+    hexagon.scale = _hexagonScale;
     [self addChild:hexagon];
     
     // Loops a number of times equal to the number of circles in the grid.
@@ -98,13 +101,14 @@ static const float _hexagonRadius = ((_hexagonHeight * (1.732050808)) / 3);
                 Hexagon *hexagon = (Hexagon *)[CCBReader load:@"Hexagon"];
                 hexagon.positionInPoints = hexagonPosition;
                 hexagon.scale = 0.04f;
+                hexagon.rotation = 90;
                 [self addChild:hexagon];
                 
                 CCActionFadeIn *fadeHexagon = [CCActionFadeIn actionWithDuration:0.5f];
                 
                 CCActionDelay *anotherDelay = [CCActionDelay actionWithDuration:0.025f];
                 
-                CCActionScaleTo *scaleHexagon = [CCActionScaleTo actionWithDuration:0.5f scale:0.06f];
+                CCActionScaleTo *scaleHexagon = [CCActionScaleTo actionWithDuration:0.5f scale:_hexagonScale];
                 [hexagon runAction:[CCActionSequence actions:fadeHexagon, anotherDelay, scaleHexagon, nil]];
                 
                 // Save the circle and number of the hexagon
@@ -169,7 +173,7 @@ static const float _hexagonRadius = ((_hexagonHeight * (1.732050808)) / 3);
     
     // Add the touched hexagon to the array of selected hexagons and highlight it if it is not equal to nil
     if (touchedHexagon != nil) {
-        touchedHexagon.scale = 0.08f;
+        touchedHexagon.scale = _highlightedHexagonScale;
         _currentHexagon = touchedHexagon;
         [_selectedHexagons addObject:touchedHexagon];
     }
@@ -185,13 +189,13 @@ static const float _hexagonRadius = ((_hexagonHeight * (1.732050808)) / 3);
     // If user drags back onto previous hexagon that was selected, deselect the last hexagon added and "un"-highlight it.
     if ([_selectedHexagons containsObject:touchedHexagon] && [_selectedHexagons indexOfObject:touchedHexagon] == ([_selectedHexagons count] - 2) && ![_currentHexagon isEqual:touchedHexagon]) {
         Hexagon *hexagon = [_selectedHexagons lastObject];
-        hexagon.scale = 0.06f;
+        hexagon.scale = _hexagonScale;
         [_selectedHexagons removeLastObject];
         _currentHexagon = touchedHexagon;
     }
     // Otherwise, if user drags onto a new hexagon that is adjacent to the previous hexagon, has the same color, and is not equal to nil, schedule the new hexagon to be removed and highlight it.
     else if (![_currentHexagon isEqual:touchedHexagon] && touchedHexagon != nil && ccpDistance(_currentHexagon.positionInPoints, touchedHexagon.positionInPoints) <= _hexagonHeight + 1 && [_currentHexagon.color isEqual:touchedHexagon.color] && ![_selectedHexagons containsObject:touchedHexagon]) {
-        touchedHexagon.scale = 0.08f;
+        touchedHexagon.scale = _highlightedHexagonScale;
         _currentHexagon = touchedHexagon;
         [_selectedHexagons addObject:touchedHexagon];
     }
@@ -209,7 +213,7 @@ static const float _hexagonRadius = ((_hexagonHeight * (1.732050808)) / 3);
     // Otherwise, if the user selected exactly one hexagon, "un"-highlight that hexagon
     else if ([_selectedHexagons count] == 1) {
         Hexagon *hexagon = _selectedHexagons[0];
-        hexagon.scale = 0.06f;
+        hexagon.scale = _hexagonScale;
     }
     // Remove all selected hexagons after a touch ends
     [_selectedHexagons removeAllObjects];
@@ -218,7 +222,7 @@ static const float _hexagonRadius = ((_hexagonHeight * (1.732050808)) / 3);
 - (void) touchCancelled:(UITouch *)touch withEvent:(UIEvent *)event {
     for (int i = 0; i < [_selectedHexagons count]; i++) {
         Hexagon *hexagon = _selectedHexagons[i];
-        hexagon.scale = 0.06f;
+        hexagon.scale = _hexagonScale;
     }
     [_selectedHexagons removeAllObjects];
 }
@@ -309,14 +313,13 @@ static const float _hexagonRadius = ((_hexagonHeight * (1.732050808)) / 3);
             if (hexagon.removed) {
                 if (hexagon.circle == (GRID_CIRCLES - 1)) {
                     hexagon.color = [self giveRandomColor:COLORS];
-                    hexagon.scale = 0.06f;
+                    hexagon.scale = _hexagonScale;
                     hexagon.removed = false;
                 } else {
                     Hexagon *temporaryHexagon = _gridArray[circle + 1][(circle + 1) * i];
                     hexagon.color = temporaryHexagon.color;
-                    hexagon.scale = 0.06f;
+                    hexagon.scale = _hexagonScale;
                     temporaryHexagon.removed = true;
-                    [self moveConnectedHexagon:temporaryHexagon toOtherHexagon:hexagon];
                     hexagon.removed = false;
                     
                     _runAgain = true;
@@ -335,7 +338,7 @@ static const float _hexagonRadius = ((_hexagonHeight * (1.732050808)) / 3);
             Hexagon *hexagon = _gridArray[4][i];
             if (hexagon.removed) {
                 hexagon.color = [self giveRandomColor:COLORS];
-                hexagon.scale = 0.06f;
+                hexagon.scale = _hexagonScale;
                 hexagon.removed = false;
             }
         }
@@ -350,10 +353,9 @@ static const float _hexagonRadius = ((_hexagonHeight * (1.732050808)) / 3);
             if (hexagon.removed) {
                 Hexagon *temporaryHexagon = _gridArray[4][temporaryInteger];
                 hexagon.color = temporaryHexagon.color;
-                hexagon.scale = 0.06f;
+                hexagon.scale = _hexagonScale;
                 hexagon.removed = false;
                 temporaryHexagon.removed = true;
-                [self moveConnectedHexagon:temporaryHexagon toOtherHexagon:hexagon];
                 _runAgain = true;
             }
             temporaryInteger += 2;
@@ -370,17 +372,16 @@ static const float _hexagonRadius = ((_hexagonHeight * (1.732050808)) / 3);
             if (randomInt == 0) {
                 Hexagon *temporaryHexagon = _gridArray[3][temporaryInteger];
                 hexagon.color = temporaryHexagon.color;
-                hexagon.scale = 0.06f;
+                hexagon.scale = _hexagonScale;
                 hexagon.removed = false;
                 temporaryHexagon.removed = true;
                 _runAgain = true;
             } else if (randomInt == 1) {
                 Hexagon *temporaryHexagon = _gridArray[3][temporaryInteger + 1];
                 hexagon.color = temporaryHexagon.color;
-                hexagon.scale = 0.06f;
+                hexagon.scale = _hexagonScale;
                 hexagon.removed = false;
                 temporaryHexagon.removed = true;
-                [self moveConnectedHexagon:temporaryHexagon toOtherHexagon:hexagon];
                 _runAgain = true;
             }
         }
@@ -392,23 +393,26 @@ static const float _hexagonRadius = ((_hexagonHeight * (1.732050808)) / 3);
 #pragma mark Animations
 // -----------------------------------------------------------------------
 
-- (void) moveConnectedHexagon:(Hexagon *)hexagonToAnimate toOtherHexagon:(Hexagon *)hexagonToMoveTo {
-    hexagonToMoveTo.opacity = 0.0f;
-    CGPoint lastHexagonPosition = hexagonToAnimate.position;
-    CCActionMoveTo *moveHexagon = [CCActionMoveTo actionWithDuration:0.5f position:hexagonToMoveTo.position];
-    
-    CCActionDelay *delay = [CCActionDelay actionWithDuration:0.55f];
-    
-    CCActionCallBlock *actionAfterAnimation = [CCActionCallBlock actionWithBlock:^{
-        hexagonToAnimate.position = lastHexagonPosition;
-        CCActionFadeIn *fadeHexagonIn = [CCActionFadeIn actionWithDuration:0.3f];
-        [hexagonToAnimate runAction:fadeHexagonIn];
-        hexagonToMoveTo.opacity = 1.0f;
-    }];
-    
-    [hexagonToAnimate runAction:[CCActionSequence actions:moveHexagon, delay, actionAfterAnimation, nil]];
-}
+//- (void) moveConnectedHexagon:(Hexagon *)hexagonToAnimate toOtherHexagon:(Hexagon *)hexagonToMoveTo {
+//    hexagonToMoveTo.opacity = 0.0f;
+//    CGPoint lastHexagonPosition = hexagonToAnimate.position;
+//    CCActionMoveTo *moveHexagon = [CCActionMoveTo actionWithDuration:0.5f position:hexagonToMoveTo.position];
+//    
+//    CCActionDelay *delay = [CCActionDelay actionWithDuration:0.55f];
+//    
+//    CCActionCallBlock *actionAfterAnimation = [CCActionCallBlock actionWithBlock:^{
+//        hexagonToAnimate.position = lastHexagonPosition;
+//        CCActionFadeIn *fadeHexagonIn = [CCActionFadeIn actionWithDuration:0.3f];
+//        [hexagonToAnimate runAction:fadeHexagonIn];
+//        hexagonToMoveTo.opacity = 1.0f;
+//    }];
+//    
+//    [hexagonToAnimate runAction:[CCActionSequence actions:moveHexagon, delay, actionAfterAnimation, nil]];
+//}
 
+- (void) animateConnectedHexagon {
+    
+}
 
 
 
@@ -448,25 +452,6 @@ static const float _hexagonRadius = ((_hexagonHeight * (1.732050808)) / 3);
             return [CCColor blackColor];
     }
 }
-
-
-
-//- (void) setScore {
-//    _time += 0.1;
-//
-//    _scoreLabel.string = [NSString stringWithFormat:@"%d", _grid.score];
-//    if (_grid.score >= 250) {
-//        [self unschedule:@selector(setScore)];
-//        CCScene *scene = [CCBReader loadAsScene:@"Recap"];
-//        Recap *recapScreen = (Recap *)scene.children[0];
-//        recapScreen.positionType = CCPositionTypeNormalized;
-//        recapScreen.position = ccp(0, 0);
-//        [[CCDirector sharedDirector] replaceScene:scene];
-//        recapScreen.finalTime.string = [NSString stringWithFormat:@"%f", _time];
-//
-//    }
-//}
-
 
 
 @end
