@@ -538,7 +538,7 @@ static const float _highlightedHexagonScale = 0.16;
         } else if (_gamemode == 3) {
             _time += 0.1;
             temporaryTime = _time;
-            if (_score >= 2) {
+            if (_score >= 200) {
                 
                 NSUserDefaults *_highscoreDefaults = [NSUserDefaults standardUserDefaults];
                 if (temporaryTime < [_highscoreDefaults integerForKey:@"pointsHighScore"] || [_highscoreDefaults integerForKey:@"pointsHighScore"] == 0) {
