@@ -34,10 +34,9 @@
     
     [_title runAction:[CCActionSequence actions:delay, bounceTitle, nil]];
     
-    
-    CCActionMoveTo *moveTimeButton = [CCActionMoveTo actionWithDuration:1.f position:ccp(0.5, 0.55)];
-    CCActionMoveTo *moveMovesButton = [CCActionMoveTo actionWithDuration:1.f position:ccp(0.5, 0.4)];
-    CCActionMoveTo *movePointsButton = [CCActionMoveTo actionWithDuration:1.f position:ccp(0.5, 0.25)];
+    CCActionMoveTo *movePointsButton = [CCActionMoveTo actionWithDuration:1.f position:ccp(0.5, 0.55)];
+    CCActionMoveTo *moveTimeButton = [CCActionMoveTo actionWithDuration:1.f position:ccp(0.5, 0.4)];
+    CCActionMoveTo *moveMovesButton = [CCActionMoveTo actionWithDuration:1.f position:ccp(0.5, 0.25)];
     
     CCActionEaseElasticOut *bounceTimeButton = [CCActionEaseElasticOut actionWithAction:moveTimeButton];
     CCActionEaseElasticOut *bounceMovesButton = [CCActionEaseElasticOut actionWithAction:moveMovesButton];
@@ -112,9 +111,9 @@
     CCActionScaleTo *scaleButtonDown = [CCActionScaleTo actionWithDuration:0.5f scale:0.001];
     CCActionEaseSineIn *easeScaleDown = [CCActionEaseSineIn actionWithAction:scaleButtonDown];
     
-    [_timeButton runAction:[CCActionSequence actions:[easeScaleUp copy], delay, [easeScaleDown copy], nil]];
-    [_movesButton runAction:[CCActionSequence actions:delay, [easeScaleUp copy], delay, [easeScaleDown copy], nil]];
-    [_pointsButton runAction:[CCActionSequence actions:delay, delay, [easeScaleUp copy], delay, [easeScaleDown copy], nil]];
+    [_pointsButton runAction:[CCActionSequence actions:[easeScaleUp copy], delay, [easeScaleDown copy], nil]];
+    [_timeButton runAction:[CCActionSequence actions:delay, [easeScaleUp copy], delay, [easeScaleDown copy], nil]];
+    [_movesButton runAction:[CCActionSequence actions:delay, delay, [easeScaleUp copy], delay, [easeScaleDown copy], nil]];
     
     
     CCActionMoveTo *moveTitleDown = [CCActionMoveTo actionWithDuration:0.1f position:ccp(0.5, 0.75)];
