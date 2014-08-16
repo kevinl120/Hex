@@ -538,7 +538,7 @@ static const float _highlightedHexagonScale = 0.16;
         } else if (_gamemode == 3) {
             _time += 0.1;
             temporaryTime = _time;
-            if (_score >= 250) {
+            if (_score >= 2) {
                 
                 NSUserDefaults *_highscoreDefaults = [NSUserDefaults standardUserDefaults];
                 if (temporaryTime < [_highscoreDefaults integerForKey:@"pointsHighScore"] || [_highscoreDefaults integerForKey:@"pointsHighScore"] == 0) {
@@ -551,8 +551,8 @@ static const float _highlightedHexagonScale = 0.16;
                 recap.positionType = CCPositionTypeNormalized;
                 recap.position = ccp(0, 0);
                 recap.gamemode = _gamemode;
-                recap.scoreLabel.string = [NSString stringWithFormat:@"%ld", (long)temporaryTime];
-                recap.highScoreLabel.string = [NSString stringWithFormat:@"%ld", (long)[_highscoreDefaults integerForKey:@"pointsHighScore"]];
+                recap.scoreLabel.string = [NSString stringWithFormat:@"%ld s", (long)temporaryTime];
+                recap.highScoreLabel.string = [NSString stringWithFormat:@"%ld s", (long)[_highscoreDefaults integerForKey:@"pointsHighScore"]];
                 [[CCDirector sharedDirector] replaceScene:recapScene withTransition:crossFade];
             }
         }

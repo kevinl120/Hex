@@ -16,6 +16,7 @@
     CCButton *_pointsButton;
     
     CCLabelTTF *_title;
+    CCLabelTTF *_instructionsLabel;
     
     Gameplay *_gameplay;
 }
@@ -45,6 +46,9 @@
     [_timeButton runAction:[CCActionSequence actions:delay, bounceTimeButton, nil]];
     [_movesButton runAction:[CCActionSequence actions:delay, bounceMovesButton, nil]];
     [_pointsButton runAction:[CCActionSequence actions:delay, bouncePointsButton, nil]];
+    
+    CCActionFadeIn *_fadeInstructions = [CCActionFadeIn actionWithDuration:1.5f];
+    [_instructionsLabel runAction:[CCActionSequence actions:delay, _fadeInstructions, nil]];
 }
 
 - (void) timeMode {
@@ -126,6 +130,11 @@
 
     
     [_title runAction:[CCActionSequence actions:easeTitleDown, anotherDelay, easeTitleUp, nil]];
+    
+    
+    
+    CCActionFadeOut *_fadeInstructions = [CCActionFadeOut actionWithDuration:0.35f];
+    [_instructionsLabel runAction:[CCActionSequence actions:anotherDelay, _fadeInstructions, nil]];
 }
 
 
