@@ -70,6 +70,8 @@ static const float _highlightedHexagonScale = 0.16;
     }];
     
     [self runAction:[CCActionSequence actions:delay, enableUserInteraction, nil]];
+    
+    [self schedule:@selector(updateHexagonScale) interval:0.1f];
 }
 
 - (void) setupScore {
@@ -343,22 +345,26 @@ static const float _highlightedHexagonScale = 0.16;
 
 - (void) removeHexagons {
     
+    _animating = true;
+    
     for (int i = 0; i < [_selectedHexagons count]; i++) {
         Hexagon *hexagon = _selectedHexagons[i];
-        [self animateConnectedHexagon:hexagon];
+        //[self animateConnectedHexagon:hexagon];
         hexagon.removed = true;
     }
     
-    CCActionCallBlock *addHexagons = [CCActionCallBlock actionWithBlock:^{
+    //CCActionCallBlock *addHexagons = [CCActionCallBlock actionWithBlock:^{
         [self fillEmptySpaces];
         for (int i = 0; i < [_selectedHexagons count]; i++) {
             Hexagon *hexagon = _selectedHexagons[i];
             [self addHexagons:hexagon];
         }
-    }];
+    //}];
     
-    CCActionDelay *delay = [CCActionDelay actionWithDuration:0.8f];
-    [self runAction:[CCActionSequence actions:delay, addHexagons, nil]];
+    _animating = false;
+    
+    //CCActionDelay *delay = [CCActionDelay actionWithDuration:0.8f];
+    //[self runAction:[CCActionSequence actions:delay, addHexagons, nil]];
 }
 
 - (void) fillEmptySpaces {
@@ -465,25 +471,31 @@ static const float _highlightedHexagonScale = 0.16;
 }
 
 
+
+- (void) updateHexagonScale {
+    
+}
+
+
 // -----------------------------------------------------------------------
 #pragma mark Animations
 // -----------------------------------------------------------------------
 
 - (void) animateConnectedHexagon:(Hexagon *)hexagonToAnimate {
-    CCActionScaleTo *scaleHexagonUp = [CCActionScaleTo actionWithDuration:0.05f scale:_highlightedHexagonScale * 1.2];
-    CCActionEaseSineIn *easeScaleUp = [CCActionEaseSineIn actionWithAction:scaleHexagonUp];
-    
-    CCActionDelay *delay = [CCActionDelay actionWithDuration:0.075f];
-    
-    CCActionScaleTo *scaleHexagonDown = [CCActionScaleTo actionWithDuration:0.5f scale:0.001];
-    CCActionEaseSineIn *easeScaleDown = [CCActionEaseSineIn actionWithAction:scaleHexagonDown];
-    
-    [hexagonToAnimate runAction:[CCActionSequence actions:[easeScaleUp copy], [delay copy], [easeScaleDown copy], nil]];
+//    CCActionScaleTo *scaleHexagonUp = [CCActionScaleTo actionWithDuration:0.05f scale:_highlightedHexagonScale * 1.2];
+//    CCActionEaseSineIn *easeScaleUp = [CCActionEaseSineIn actionWithAction:scaleHexagonUp];
+//    
+//    CCActionDelay *delay = [CCActionDelay actionWithDuration:0.075f];
+//    
+//    CCActionScaleTo *scaleHexagonDown = [CCActionScaleTo actionWithDuration:0.5f scale:0.001];
+//    CCActionEaseSineIn *easeScaleDown = [CCActionEaseSineIn actionWithAction:scaleHexagonDown];
+//    
+//    [hexagonToAnimate runAction:[CCActionSequence actions:[easeScaleUp copy], [delay copy], [easeScaleDown copy], nil]];
 }
 
 - (void) addHexagons:(Hexagon *)hexagonToAnimate {
-    CCActionScaleTo *scaleHexagonToNormal = [CCActionScaleTo actionWithDuration:0.05f scale:_hexagonScale];
-    [hexagonToAnimate runAction:[scaleHexagonToNormal copy]];
+//    CCActionScaleTo *scaleHexagonToNormal = [CCActionScaleTo actionWithDuration:0.05f scale:_hexagonScale];
+//    [hexagonToAnimate runAction:[scaleHexagonToNormal copy]];
 }
 
 
